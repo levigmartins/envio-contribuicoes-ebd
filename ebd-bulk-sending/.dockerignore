@@ -1,0 +1,25 @@
+# Ignorar node_modules (será instalado via Dockerfile)
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Ignorar pastas locais
+.next
+out
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Configs locais
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+
+# Outros
+docker-compose.override.yml
