@@ -6,7 +6,7 @@ export async function PUT(request, { params }) {
     await connectToDatabase();
 
     const body = await request.json();
-    const { id } = await params;
+    const { id } = params;
 
     try {
         const response = await Membro.updateOne({ _id: id }, body);
@@ -19,7 +19,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
     await connectToDatabase();
 
-    const { id } = await params;
+    const { id } = params;
 
     try {
         const response = await Membro.deleteOne({ _id: id });
