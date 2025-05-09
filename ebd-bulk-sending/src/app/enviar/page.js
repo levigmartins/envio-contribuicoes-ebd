@@ -62,9 +62,22 @@ export default function Enviar() {
             return;
         }
 
-        // Placeholder de envio
-        console.log({ mensagem, membros: selecionados });
-        alert('Enviado!');
+        const body = {
+            members: membros,
+            answer: mensagem
+        }
+
+        const res = await fetch('/api/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (!res.ok) alert('Erro ao enviar contribuição.');
+
+        const data = await res.json();
+
+        console.log(data)
     };
 
     return (

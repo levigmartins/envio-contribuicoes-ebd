@@ -1,5 +1,5 @@
+import puppeteer from 'puppeteer';
 import { connectToDatabase } from "@/lib/mongodb";
-import { cookies } from "next/headers";
 
 export async function POST(request) {
     await connectToDatabase();
@@ -8,35 +8,55 @@ export async function POST(request) {
 
     const { members, answer } = await request.json();
 
-    /* TODO: 1 -- BUSCAR O ID DA EBD ATUAL */
+    const ebdId = await searchEBDId();
 
-    const ebdId = searchEBDId();
+    if (!ebdId) Response.json({ message: "Erro ao buscar ID da EBD da semana!" }, { status: 404 });
 
     members.forEach(async (member) => {
         try {
-            const memberData = await fetch(
-                `https://intregracao-site.presbiterio.org.br/api-ebd/consultacpf/${member.cpf}`
+            let memberData = await fetch(
+                `https://intregracao-site.presbiterio.org.br/api-ebd/consultacpf/${member.cpf}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Host': 'intregracao-site.presbiterio.org.br',
+                        'Cache-Control': 'no-cache',
+                        'Accept': 'application/json',
+                        'User-Agent': 'Mozilla/5.0',
+                    }
+
+                }
             );
 
             if (memberData.status !== 200) throw new Error("Error returning member CPF.");
+
+            memberData = await memberData.json();
 
             const payload = mountAnswerPayload(member, memberData, answer, ebdId);
 
             const responseAnswer = await fetch(
                 'https://intregracao-site.presbiterio.org.br/api-ebd/cadastro-contribuicao',
                 {
-                    /* TODO: 2 -- ENVIAR HEADERS E PAYLOAD PARA REQUISIÇÃO */
+                    method: 'POST',
+                    headers: {
+                        'Host': 'intregracao-site.presbiterio.org.br',
+                        'Cache-Control': 'no-cache',
+                        'Accept': 'application/json',
+                        'User-Agent': 'Mozilla/5.0', // às vezes necessário para evitar bloqueio
+                    },
+                    body: payload
+
                 }
             );
 
-            if (responseAnswer.status !== 200 ) throw new Error("Error sending answer.");
+            if (responseAnswer.status !== 200) throw new Error("Error sending answer.");
 
             answersSent.push({
                 cpf: member.cpf,
                 name: memberData.name
             })
 
-        } catch(err) {
+        } catch (err) {
             answersError.push({
                 cpf: member.cpf,
                 name: member.name
@@ -49,13 +69,35 @@ export async function POST(request) {
 }
 
 async function searchEBDId() {
+    const browser = await puppeteer.launch({
+        headless: 'new', // ou false para debug com navegador visível
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // útil em alguns ambientes
+    });
 
+    const page = await browser.newPage();
+
+    try {
+        await page.goto('https://www.igrejacristamaranata.org.br/ebd/participacoes/', {
+            waitUntil: 'networkidle2' // aguarda carregamento "estável"
+        });
+
+        await page.waitForSelector('input[name="icm_member_ebd"]');
+
+        const sessionId = await page.$eval('input[name="icm_member_ebd"]', el => el.value);
+
+        return sessionId;
+    } catch (err) {
+        console.error('Erro no Puppeteer:', err);
+        return null;
+    } finally {
+        await browser.close();
+    }
 }
 
 async function mountAnswerPayload(member, memberData, answer, ebdId) {
     const { cpf, trabalho_id, funcao_id } = member;
     const { nome, cidade, uf, email, celular } = memberData;
-    return {
+    const payload = {
         "nome": nome,
         "cpf": cpf,
         "denominacao_id": 21,
@@ -71,5 +113,7 @@ async function mountAnswerPayload(member, memberData, answer, ebdId) {
         "categoria_id": "2",
         "contribuicao": answer,
         "aceite_termo": true
-    } 
+    };
+
+    return JSON.stringify(payload);
 }
