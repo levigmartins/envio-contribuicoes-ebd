@@ -3,15 +3,25 @@ import { useEffect, useState } from 'react';
 import MembroModal from '@/components/MembroModal';
 
 const labelTrabalho = {
-    '1': 'Tesoureiro',
-    '2': 'Secretário',
-    // ...adicione mais
+    '21': 'Participação Individual',
+    '5': 'Registrado pelo Pastor',
+    '2': 'Trabalho de Jovens',
+    '3': 'Trabalho de Obreiros',
+    '4': 'Trabalho de Professoras',
+    '1': 'Trabalho de Senhoras'
 };
 
 const labelFuncao = {
-    '1': 'Professor',
-    '2': 'Auxiliar',
-    // ...adicione mais
+    '1': 'Obreiro',
+    '2': 'Diacono',
+    '3': 'Ungido',
+    '4': 'Pastor',
+    '5': 'Senhora de Frente',
+    '6': 'Instrumentista',
+    '7': 'Grupo de Louvor',
+    '8': 'Outros',
+    '9': 'Membro',
+    '10': 'Professora'
 };
 
 export default function Membros() {
@@ -152,6 +162,8 @@ export default function Membros() {
                     onSubmit={handleSubmit}
                     onClose={() => { setShowModal(false); setEditando(null); }}
                     editando={editando}
+                    labelTrabalho={labelTrabalho}
+                    labelFuncao={labelFuncao}
                 />
             )}
         </main>

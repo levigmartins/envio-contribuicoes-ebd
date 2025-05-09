@@ -1,4 +1,4 @@
-export default function MembroModal({ form, setForm, onClose, onSubmit, editando }) {
+export default function MembroModal({ form, setForm, onClose, onSubmit, editando, labelTrabalho, labelFuncao }) {
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow p-6 w-[90%] max-w-md">
@@ -36,8 +36,11 @@ export default function MembroModal({ form, setForm, onClose, onSubmit, editando
                             className="w-full border px-3 py-2 rounded"
                         >
                             <option value="">Selecione...</option>
-                            <option value="1">Tesoureiro</option>
-                            <option value="2">Secretário</option>
+                            {Object.entries(labelTrabalho).map(([value, label]) => (
+                                <option key={value} value={value}>
+                                {label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div>
@@ -49,8 +52,11 @@ export default function MembroModal({ form, setForm, onClose, onSubmit, editando
                             className="w-full border px-3 py-2 rounded"
                         >
                             <option value="">Selecione...</option>
-                            <option value="1">Professor</option>
-                            <option value="2">Auxiliar</option>
+                            {Object.entries(labelFuncao).map(([value, label]) => (
+                                <option key={value} value={value}>
+                                {label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div className="flex justify-end gap-2">
